@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiClient } from "../utils/apiClient";
 
 export interface Book {
   id: number;
@@ -16,88 +17,33 @@ const useBooks = () => {
   const [books, setBooks] = useState<Book[]>([]);
 
   const fetchBooks = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found");
-      return;
-    }
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/books`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch books");
-    }
-    const data: Book[] = await response.json();
-    setBooks(data);
+    const response = await apiClient.get<Book[]>(`/api/books`);
+
+    if (response.data) setBooks(response.data);
   };
 
   const deleteBook = async (id: number) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found");
-      return;
-    }
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/books/${id}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (!response.ok) {
-      throw new Error("Failed to delete book");
-    }
-    setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
+    const response = await apiClient.delete(`/api/books/${id}`);
+    if (response.isSuccess)
+      setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
   };
 
   const addBook = async (bookData: Book) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found");
-      return;
-    }
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/books`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(bookData),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to add book");
-    }
-    // After adding a book, fetch the list again to refresh the state
-    await fetchBooks();
+    const response = await apiClient.post(
+      `/api/books`,
+      JSON.stringify(bookData)
+    );
+    if (response.isSuccess) await fetchBooks();
   };
 
   const parseBookImage = async (file: File) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.error("Token not found");
-      return;
-    }
     const formData = new FormData();
     formData.append("file", file);
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/books/parse-image`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }
+    const response = await apiClient.post<Book>(
+      `/api/books/parse-image`,
+      formData
     );
-    if (!response.ok) {
-      throw new Error("Failed to parse image");
-    }
-    return response.json();
+    return response.data;
   };
 
   return { books, fetchBooks, deleteBook, addBook, parseBookImage };

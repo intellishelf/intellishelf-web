@@ -1,32 +1,27 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { apiClient } from "../utils/apiClient";
+import { tokenClient } from "../utils/tokenClient";
 
 const useAuth = () => {
-  const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [loginError, setLoginError] = useState<string | undefined>("");
 
   const login = async (userName: string, password: string) => {
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/api/auth/login`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userName, password }),
-      }
+    const response = await apiClient.post<{ token: string }>(
+      "/api/auth/login",
+      JSON.stringify({ userName, password }),
+      true
     );
 
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-      navigate("/"); // Redirect to home
-    } else {
-      setError("Login failed");
+    if (response.isSuccess && response.data) {
+      tokenClient.setToken(response.data.token);
+      return true;
     }
+
+    setLoginError(response.error);
+    return false;
   };
 
-  return { login, error };
+  return { login, loginError };
 };
 
 export default useAuth;

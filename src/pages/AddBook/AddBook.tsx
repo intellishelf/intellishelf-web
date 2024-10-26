@@ -29,14 +29,13 @@ const AddBook = () => {
 
   const handleParseImage = async () => {
     if (!file) return;
-
     setLoading(true); // Start loading
 
     try {
       const parsedBook = await parseBookImage(file);
       if (parsedBook) {
         Object.keys(parsedBook).forEach((key) => {
-          setValue(key as keyof Book, parsedBook[key]);
+          setValue(key as keyof Book, parsedBook[key as keyof Book]);
         });
       }
     } catch (error) {
@@ -60,7 +59,11 @@ const AddBook = () => {
             onChange={handleFileChange}
             className="add-book-file" // Apply the new class for styling
           />
-          <button type="button" onClick={handleParseImage} className="parse-button">
+          <button
+            type="button"
+            onClick={handleParseImage}
+            className="parse-button"
+          >
             Parse Image
           </button>
         </div>
@@ -123,7 +126,9 @@ const AddBook = () => {
       {modalVisible && (
         <div className="modal">
           <div className="modal-content">
-            <span className="close" onClick={closeModal}>&times;</span>
+            <span className="close" onClick={closeModal}>
+              &times;
+            </span>
             <p>Book added successfully!</p>
           </div>
         </div>
