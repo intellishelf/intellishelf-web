@@ -1,0 +1,7 @@
+.delete-button {
+  border: none; /* Remove border */
+  background: none; /* Remove default button background */
+  cursor: pointer; /* Change cursor to pointer */
+  margin-left: 10px; /* Add spacing to the left */
+}
+ 

@@ -2,11 +2,11 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
-import Login from "./pages/Login";
-import Books from "./pages/Books";
-import Navbar from "./components/Navbar";
-import AddBook from "./pages/AddBook";
-
+import Login from "./pages/Login/Login";
+import Books from "./pages/Books/Books";
+import AddBook from "./pages/AddBook/AddBook";
+import ProtectedRoute from "./components/ProtectedRoute";
+import "./index.css";
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
@@ -14,11 +14,12 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Router>
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Books />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/add-book" element={<AddBook />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<Books />} />
+          <Route path="/add-book" element={<AddBook />} />
+        </Route>
       </Routes>
     </Router>
   </React.StrictMode>

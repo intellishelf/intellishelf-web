@@ -1,39 +1,26 @@
 import React, { useState } from "react";
+import useAuth from "../../hooks/useAuth";
+import "./Login.css";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { login, error: loginError } = useAuth();
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userName: username, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Login failed");
-      }
-
-      const data = await response.json();
-      localStorage.setItem("token", data.token);
-    } catch (error) {
-      console.error(error);
-    }
+    await login(username, password);
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
+    <div className="login-container">
+      <form onSubmit={handleLogin} className="login-form">
         <label htmlFor="username">Username:</label>
         <input
           type="text"
           id="username"
           name="username"
+          className="login-input"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
@@ -43,11 +30,16 @@ const Login = () => {
           type="password"
           id="password"
           name="password"
+          className="login-input"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <br />
-        <input type="submit" value="Login" />
+        <button type="submit" className="login-button">
+          Login
+        </button>
+        {loginError && <p className="error-message">{loginError}</p>}{" "}
+        {/* Display error message */}
       </form>
     </div>
   );

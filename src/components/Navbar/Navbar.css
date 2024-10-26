@@ -1,0 +1,44 @@
+
+.navbar {
+    position: fixed; /* Fixes the navbar to the left */
+    top: 0; /* Aligns it to the top */
+    left: 0; /* Aligns it to the left */
+    width: 200px; /* Sets a width for the navbar */
+    height: 100vh; /* Sets height to fill the viewport */
+    background-color: #f8f9fa; /* Light background color */
+    padding: 20px; /* Adds padding */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Adds a subtle shadow */
+  }
+  
+  .navbar ul {
+    list-style-type: none; /* Removes bullet points */
+    padding: 0; /* Removes default padding */
+  }
+  
+  .navbar li {
+    margin: 15px 0; /* Adds space between links */
+  }
+  
+  .navbar a {
+    text-decoration: none; /* Removes underline from links */
+    color: #007bff; /* Sets link color */
+    font-weight: bold; /* Makes links bold */
+  }
+  
+  .navbar a:hover {
+    color: #0056b3; /* Changes color on hover */
+  }
+
+  .main-content {
+    margin-left: 220px; /* Adjust based on the width of your navbar */
+    padding: 20px; /* Optional: Add padding for better spacing */
+  }
+  
+  .logout-button {
+    background: none; /* Remove default button background */
+    border: none; /* Remove border */
+    color: #007bff; /* Link color */
+    cursor: pointer; /* Change cursor to pointer */
+    font-weight: bold; /* Make it bold */
+  }
+  
