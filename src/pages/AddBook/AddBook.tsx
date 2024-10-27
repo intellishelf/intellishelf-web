@@ -1,16 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "./AddBook.css"; // Import the CSS file
 import useBooks, { Book } from "../../hooks/useBooks"; // Import the useBooks hook and Book interface
 
 const AddBook = () => {
   const { register, handleSubmit, setValue } = useForm<Book>();
-  const [file, setFile] = useState<File | null>(null);
-  const [modalVisible, setModalVisible] = useState(false);
   const { addBook, parseBookImage } = useBooks();
-  const navigate = useNavigate(); // Initialize useNavigate
-  const [loading, setLoading] = useState(false); // New state for loading
+  const [bookImage, setBookImage] = useState<File | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [bookIsParsing, setBookIsParsing] = useState(false); // New state for loading
 
   const onSubmit = async (data: Book) => {
     try {
@@ -23,16 +21,17 @@ const AddBook = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setFile(event.target.files[0]);
+      setBookImage(event.target.files[0]);
     }
   };
 
   const handleParseImage = async () => {
-    if (!file) return;
-    setLoading(true); // Start loading
+    if (!bookImage) return;
+
+    setBookIsParsing(true);
 
     try {
-      const parsedBook = await parseBookImage(file);
+      const parsedBook = await parseBookImage(bookImage);
       if (parsedBook) {
         Object.keys(parsedBook).forEach((key) => {
           setValue(key as keyof Book, parsedBook[key as keyof Book]);
@@ -40,13 +39,13 @@ const AddBook = () => {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoading(false); // End loading
     }
+
+    setBookIsParsing(false);
   };
 
   const closeModal = () => {
-    navigate("/"); // Redirect to /books after closing the modal
+    setModalVisible(false);
   };
 
   return (
@@ -67,11 +66,6 @@ const AddBook = () => {
             Parse Image
           </button>
         </div>
-        {loading && (
-          <div className="loader-modal">
-            <div className="loader-content">Loading...</div>
-          </div>
-        )}
         <label htmlFor="title">Title:</label>
         <input
           type="text"
@@ -122,6 +116,12 @@ const AddBook = () => {
         />
         <input type="submit" value="Add Book" className="add-book-button" />
       </form>
+
+      {bookIsParsing && (
+        <div className="loader-modal">
+          <div className="loader-content">Recognizing...</div>
+        </div>
+      )}
 
       {modalVisible && (
         <div className="modal">

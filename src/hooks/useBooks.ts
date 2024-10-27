@@ -4,13 +4,13 @@ import { apiClient } from "../utils/apiClient";
 export interface Book {
   id: number;
   title: string;
-  authors: string;
+  authors?: string;
   publicationDate?: string;
   isbn?: string;
   description?: string;
   publisher?: string;
-  pages: number;
-  imageUrl: string;
+  pages?: number;
+  imageUrl?: string;
 }
 
 const useBooks = () => {
