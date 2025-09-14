@@ -1,12 +1,18 @@
 import { tokenClient } from "./tokenClient";
 
-export interface BaseApiResponse {
-  isSuccess: boolean;
-  error?: string;
+export interface ProblemDetails {
+  title: string;
+  status: number;
+  type: string;
+  detail?: string;
+  instance?: string;
 }
 
-export interface ApiResponse<T> extends BaseApiResponse {
-  data?: T;
+export class ApiError extends Error {
+  constructor(public problemDetails: ProblemDetails, public statusCode: number) {
+    super(problemDetails.title);
+    this.name = 'ApiError';
+  }
 }
 
 async function call<T>(
@@ -14,11 +20,14 @@ async function call<T>(
   method: string,
   body?: string | FormData,
   withoutToken?: boolean
-): Promise<ApiResponse<T>> {
+): Promise<T> {
   const token = tokenClient.getToken();
   if (!token && !withoutToken) {
     window.location.href = "/login";
-    return { error: "Token not found", isSuccess: false };
+    throw new ApiError(
+      { title: "Token not found", status: 401, type: "Unauthorized" },
+      401
+    );
   }
 
   const headers = {
@@ -35,21 +44,38 @@ async function call<T>(
     });
 
     if (result.ok) {
-      return {
-        isSuccess: true,
-        data: result.status === 204 ? null : await result.json(),
+      // Return the actual content directly
+      return result.status === 204 ? (null as T) : await result.json();
+    }
+
+    // Handle error response - parse ProblemDetails
+    let problemDetails: ProblemDetails;
+    try {
+      problemDetails = await result.json() as ProblemDetails;
+    } catch {
+      // Fallback if response is not JSON
+      problemDetails = {
+        title: result.statusText || "Request failed",
+        status: result.status,
+        type: "UnknownError"
       };
     }
 
-    return {
-      isSuccess: false,
-      error: result.statusText || "Request failed",
-    };
+    throw new ApiError(problemDetails, result.status);
   } catch (err) {
-    return {
-      isSuccess: false,
-      error: err instanceof Error ? err.message : "Unknown error occurred",
-    };
+    if (err instanceof ApiError) {
+      throw err; // Re-throw ApiError as-is
+    }
+    
+    // Network or other errors
+    throw new ApiError(
+      {
+        title: err instanceof Error ? err.message : "Unknown error occurred",
+        status: 500,
+        type: "NetworkError"
+      },
+      500
+    );
   }
 }
 
@@ -57,5 +83,7 @@ export const apiClient = {
   get: <T>(url: string) => call<T>(url, "GET"),
   post: <T>(url: string, body: string | FormData, withoutToken?: boolean) =>
     call<T>(url, "POST", body, withoutToken),
-  delete: (url: string) => call(url, "DELETE") as Promise<BaseApiResponse>,
+  put: <T>(url: string, body: string | FormData) =>
+    call<T>(url, "PUT", body),
+  delete: <T>(url: string) => call<T>(url, "DELETE"),
 };

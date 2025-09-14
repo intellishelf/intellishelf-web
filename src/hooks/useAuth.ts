@@ -1,24 +1,37 @@
 import { useState } from "react";
-import { apiClient } from "../utils/apiClient";
+import { apiClient, ApiError } from "../utils/apiClient";
 import { tokenClient } from "../utils/tokenClient";
+
+interface LoginResult {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiry: string;
+}
 
 const useAuth = () => {
   const [loginError, setLoginError] = useState<string | undefined>("");
 
-  const login = async (userName: string, password: string) => {
-    const response = await apiClient.post<{ token: string }>(
-      "/api/auth/login",
-      JSON.stringify({ userName, password }),
-      true
-    );
+  const login = async (email: string, password: string) => {
+    try {
+      const loginResult = await apiClient.post<LoginResult>(
+        "/auth/login",
+        JSON.stringify({ email, password }),
+        true
+      );
 
-    if (response.isSuccess && response.data) {
-      tokenClient.setToken(response.data.token);
+      tokenClient.setToken(loginResult.accessToken);
+      // Store refresh token if needed later
+      localStorage.setItem('refreshToken', loginResult.refreshToken);
+      setLoginError("");
       return true;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setLoginError(error.problemDetails.title);
+      } else {
+        setLoginError("An unexpected error occurred");
+      }
+      return false;
     }
-
-    setLoginError(response.error);
-    return false;
   };
 
   return { login, loginError };

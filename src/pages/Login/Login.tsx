@@ -4,28 +4,28 @@ import useAuth from "../../hooks/useAuth";
 import "./Login.css";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, loginError } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (await login(username, password)) navigate("/");
+    if (await login(email, password)) navigate("/");
   };
 
   return (
     <div className="login-container">
       <form onSubmit={handleLogin} className="login-form">
         <div>
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="email">Email:</label>
           <input
-            type="text"
-            id="username"
-            name="username"
+            type="email"
+            id="email"
+            name="email"
             className="login-input"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
