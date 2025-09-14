@@ -8,6 +8,13 @@ interface LoginResult {
   accessTokenExpiry: string;
 }
 
+interface OAuthLoginRequest {
+  provider: string;
+  accessToken: string;
+  email?: string;
+  name?: string;
+}
+
 const useAuth = () => {
   const [loginError, setLoginError] = useState<string | undefined>("");
 
@@ -20,7 +27,6 @@ const useAuth = () => {
       );
 
       tokenClient.setToken(loginResult.accessToken);
-      // Store refresh token if needed later
       localStorage.setItem('refreshToken', loginResult.refreshToken);
       setLoginError("");
       return true;
@@ -34,7 +40,29 @@ const useAuth = () => {
     }
   };
 
-  return { login, loginError };
+  const oAuthLogin = async (oAuthData: OAuthLoginRequest) => {
+    try {
+      const loginResult = await apiClient.post<LoginResult>(
+        "/auth/oauth/login",
+        JSON.stringify(oAuthData),
+        true
+      );
+
+      tokenClient.setToken(loginResult.accessToken);
+      localStorage.setItem('refreshToken', loginResult.refreshToken);
+      setLoginError("");
+      return true;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        setLoginError(error.problemDetails.title);
+      } else {
+        setLoginError("OAuth login failed");
+      }
+      return false;
+    }
+  };
+
+  return { login, oAuthLogin, loginError };
 };
 
 export default useAuth;

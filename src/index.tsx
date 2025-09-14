@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import reportWebVitals from "./reportWebVitals";
 import Login from "./pages/Login/Login";
 import Books from "./pages/Books/Books";
@@ -13,15 +14,17 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<Books />} />
-          <Route path="/add-book" element={<AddBook />} />
-        </Route>
-      </Routes>
-    </Router>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID!}>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<Books />} />
+            <Route path="/add-book" element={<AddBook />} />
+          </Route>
+        </Routes>
+      </Router>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 
