@@ -24,7 +24,7 @@ const Login = () => {
     }
   };
 
-  const handleOAuthSuccess = async (oAuthData: any) => {
+  const handleOAuthSuccess = async (oAuthData: { code: string; redirectUri: string }) => {
     setIsLoading(true);
     try {
       if (await oAuthLogin(oAuthData)) {

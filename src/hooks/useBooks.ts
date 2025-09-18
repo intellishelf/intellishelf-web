@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { apiClient } from "../utils/apiClient";
 
 export interface Book {
@@ -46,7 +46,7 @@ const useBooks = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchBooks = async (queryParams?: BookQueryParameters) => {
+  const fetchBooks = useCallback(async (queryParams?: BookQueryParameters) => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -68,27 +68,27 @@ const useBooks = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAllBooks = async () => {
+  const fetchAllBooks = useCallback(async () => {
     try {
       const books = await apiClient.get<Book[]>(`/books/all`);
       setBooks(books);
     } catch (error) {
       console.error('Failed to fetch all books:', error);
     }
-  };
+  }, []);
 
-  const deleteBook = async (id: string) => {
+  const deleteBook = useCallback(async (id: string) => {
     try {
       await apiClient.delete<void>(`/books/${id}`);
       setBooks((prevBooks) => prevBooks.filter((book) => book.id !== id));
     } catch (error) {
       console.error('Failed to delete book:', error);
     }
-  };
+  }, []);
 
-  const addBook = async (formData: FormData) => {
+  const addBook = useCallback(async (formData: FormData) => {
     try {
       const newBook = await apiClient.post<Book>(`/books`, formData);
       await fetchBooks(); // Refresh the list
@@ -96,9 +96,9 @@ const useBooks = () => {
     } catch (error) {
       return { success: false, error };
     }
-  };
+  }, [fetchBooks]);
 
-  const parseBookText = async (text: string) => {
+  const parseBookText = useCallback(async (text: string) => {
     try {
       return await apiClient.post<Book>(
         `/books/parse-text`,
@@ -108,7 +108,7 @@ const useBooks = () => {
       console.error('Failed to parse book text:', error);
       return null;
     }
-  };
+  }, []);
 
   return { 
     books, 

@@ -6,7 +6,7 @@ const Books = () => {
   const { books, totalCount, totalPages, currentPage, isLoading, fetchBooks, deleteBook } = useBooks();
   const [orderBy, setOrderBy] = useState<BookOrderBy>(BookOrderBy.Added);
   const [ascending, setAscending] = useState(true);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(3);
 
   const loadBooks = useCallback(() => {
     fetchBooks({ page: 1, pageSize, orderBy, ascending });

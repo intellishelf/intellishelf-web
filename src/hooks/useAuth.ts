@@ -9,10 +9,8 @@ interface LoginResult {
 }
 
 interface OAuthLoginRequest {
-  provider: string;
-  accessToken: string;
-  email?: string;
-  name?: string;
+  code: string;
+  redirectUri: string;
 }
 
 const useAuth = () => {
@@ -42,8 +40,9 @@ const useAuth = () => {
 
   const oAuthLogin = async (oAuthData: OAuthLoginRequest) => {
     try {
+      // Exchange authorization code for tokens
       const loginResult = await apiClient.post<LoginResult>(
-        "/auth/oauth/login",
+        "/auth/google/exchange",  // Backend endpoint for Google code exchange
         JSON.stringify(oAuthData),
         true
       );
@@ -56,7 +55,7 @@ const useAuth = () => {
       if (error instanceof ApiError) {
         setLoginError(error.problemDetails.title);
       } else {
-        setLoginError("OAuth login failed");
+        setLoginError("OAuth code exchange failed");
       }
       return false;
     }

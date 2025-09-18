@@ -3,18 +3,18 @@ import { useGoogleLogin } from '@react-oauth/google';
 import "./GoogleOAuthButton.css";
 
 interface GoogleOAuthButtonProps {
-  onSuccess: (tokenResponse: any) => void;
+  onSuccess: (response: { code: string; redirectUri: string }) => void;
   onError: (error: any) => void;
   disabled?: boolean;
 }
 
 const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({ onSuccess, onError, disabled }) => {
   const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
+    onSuccess: async (codeResponse) => {
       try {
         const oAuthData = {
-          provider: "Google",
-          accessToken: tokenResponse.access_token,
+          code: codeResponse.code,
+          redirectUri: window.location.origin
         };
         onSuccess(oAuthData);
       } catch (error) {
@@ -22,9 +22,9 @@ const GoogleOAuthButton: React.FC<GoogleOAuthButtonProps> = ({ onSuccess, onErro
       }
     },
     onError: (error) => onError(error),
-    flow: 'implicit', // Use implicit flow to get access token directly
-    scope: 'email profile', // Request these scopes
-  });
+    flow: 'auth-code',
+    scope: 'email profile'
+    });
 
   return (
     <div className="google-oauth-container" style={{ opacity: disabled ? 0.5 : 1 }}>
