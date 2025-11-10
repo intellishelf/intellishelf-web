@@ -1,31 +1,23 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { apiClient, ApiError } from "../utils/apiClient";
-import { tokenClient } from "../utils/tokenClient";
 
-interface LoginResult {
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpiry: string;
-}
-
-interface OAuthLoginRequest {
-  code: string;
-  redirectUri: string;
-}
+type ExternalProvider = "google" | "facebook";
 
 const useAuth = () => {
   const [loginError, setLoginError] = useState<string | undefined>("");
 
+  const apiBase = useMemo(() => {
+    const baseUrl = process.env.REACT_APP_API_URL ?? "";
+    return baseUrl.replace(/\/$/, "");
+  }, []);
+
   const login = async (email: string, password: string) => {
     try {
-      const loginResult = await apiClient.post<LoginResult>(
+      await apiClient.post<void>(
         "/auth/login",
-        JSON.stringify({ email, password }),
-        true
+        JSON.stringify({ email, password })
       );
 
-      tokenClient.setToken(loginResult.accessToken);
-      localStorage.setItem('refreshToken', loginResult.refreshToken);
       setLoginError("");
       return true;
     } catch (error) {
@@ -38,30 +30,37 @@ const useAuth = () => {
     }
   };
 
-  const oAuthLogin = async (oAuthData: OAuthLoginRequest) => {
-    try {
-      // Exchange authorization code for tokens
-      const loginResult = await apiClient.post<LoginResult>(
-        "/auth/google/exchange",  // Backend endpoint for Google code exchange
-        JSON.stringify(oAuthData),
-        true
-      );
+  const startExternalLogin = (provider: ExternalProvider, returnPath = "/") => {
+    if (!apiBase) {
+      console.error("REACT_APP_API_URL is not configured");
+      return false;
+    }
 
-      tokenClient.setToken(loginResult.accessToken);
-      localStorage.setItem('refreshToken', loginResult.refreshToken);
-      setLoginError("");
+    try {
+      const target = new URL(`${apiBase}/auth/${provider}`);
+      target.searchParams.set("returnUrl", returnPath);
+      window.location.href = target.toString();
       return true;
     } catch (error) {
-      if (error instanceof ApiError) {
-        setLoginError(error.problemDetails.title);
-      } else {
-        setLoginError("OAuth code exchange failed");
-      }
+      console.error(`Failed to initiate ${provider} login`, error);
       return false;
     }
   };
 
-  return { login, oAuthLogin, loginError };
+  const logout = async () => {
+    try {
+      await apiClient.post<void>("/auth/logout");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
+
+  return {
+    login,
+    startExternalLogin,
+    logout,
+    loginError,
+  };
 };
 
 export default useAuth;

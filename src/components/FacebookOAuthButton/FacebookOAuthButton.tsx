@@ -1,69 +1,23 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./FacebookOAuthButton.css";
 
 interface FacebookOAuthButtonProps {
-  onSuccess: (tokenResponse: any) => void;
-  onError: (error: any) => void;
+  onClick: () => void;
   disabled?: boolean;
 }
 
-declare global {
-  interface Window {
-    FB: any;
-    fbAsyncInit: () => void;
-  }
-}
-
-const FacebookOAuthButton: React.FC<FacebookOAuthButtonProps> = ({ onSuccess, onError, disabled }) => {
-  useEffect(() => {
-    // Initialize Facebook SDK when it's loaded
-    const initializeFB = () => {
-      if (window.FB) {
-        window.FB.init({
-          appId: process.env.REACT_APP_FACEBOOK_APP_ID,
-          cookie: true,
-          xfbml: true,
-          version: 'v18.0'
-        });
-      }
-    };
-
-    // Initialize Facebook SDK
-    window.fbAsyncInit = initializeFB;
-
-    // If FB is already loaded, initialize immediately
-    if (window.FB) {
-      initializeFB();
+const FacebookOAuthButton: React.FC<FacebookOAuthButtonProps> = ({ onClick, disabled }) => {
+  const handleClick = () => {
+    if (!disabled) {
+      onClick();
     }
-  }, []);
-
-  const handleFacebookLogin = () => {
-    if (disabled) return;
-
-    window.FB.login((response: any) => {
-      if (response.authResponse) {
-        // Get user profile information
-        window.FB.api('/me', { fields: 'name,email' }, (userInfo: any) => {
-          const oAuthData = {
-            provider: "Facebook",
-            accessToken: response.authResponse.accessToken,
-            email: userInfo.email,
-            name: userInfo.name,
-          };
-
-          onSuccess(oAuthData);
-        });
-      } else {
-        onError(new Error('Facebook login was cancelled'));
-      }
-    }, { scope: 'email' });
   };
 
   return (
     <div className="facebook-oauth-container">
-      <button 
-        className="facebook-login-button" 
-        onClick={handleFacebookLogin}
+      <button
+        className="facebook-login-button"
+        onClick={handleClick}
         disabled={disabled}
       >
         <svg className="facebook-icon" viewBox="0 0 24 24" width="20" height="20">

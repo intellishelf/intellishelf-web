@@ -9,7 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login, oAuthLogin, loginError } = useAuth();
+  const { login, startExternalLogin, loginError } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -24,19 +24,13 @@ const Login = () => {
     }
   };
 
-  const handleOAuthSuccess = async (oAuthData: { code: string; redirectUri: string }) => {
+  const handleExternalLogin = (provider: "google" | "facebook") => {
     setIsLoading(true);
-    try {
-      if (await oAuthLogin(oAuthData)) {
-        navigate("/");
-      }
-    } finally {
+    const redirectUrl = `${window.location.origin}/`;
+    const didStart = startExternalLogin(provider, redirectUrl);
+    if (!didStart) {
       setIsLoading(false);
     }
-  };
-
-  const handleOAuthError = (error: any) => {
-    console.error("OAuth login error:", error);
   };
 
   return (
@@ -46,15 +40,13 @@ const Login = () => {
         
         {/* OAuth Login Section */}
         <div className="oauth-section">
-          <GoogleOAuthButton 
-            onSuccess={handleOAuthSuccess} 
-            onError={handleOAuthError}
+          <GoogleOAuthButton
+            onClick={() => handleExternalLogin("google")}
             disabled={isLoading}
           />
-          
-          <FacebookOAuthButton 
-            onSuccess={handleOAuthSuccess} 
-            onError={handleOAuthError}
+
+          <FacebookOAuthButton
+            onClick={() => handleExternalLogin("facebook")}
             disabled={isLoading}
           />
         </div>

@@ -1,44 +1,63 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import './Navbar.css'
+import useAuth from "../../hooks/useAuth";
+import { apiClient, ApiError } from "../../utils/apiClient";
+import "./Navbar.css";
+
+interface CurrentUserResponse {
+  userName?: string;
+  name?: string;
+  email?: string;
+}
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const { logout } = useAuth();
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // Clear the token
-    navigate("/login"); // Redirect to the login page
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await apiClient.get<CurrentUserResponse>("/auth/me");
+        const displayName = user.userName || user.name || user.email || null;
+        setCurrentUser(displayName);
+      } catch (error) {
+        if (error instanceof ApiError && error.statusCode === 401) {
+          setCurrentUser(null);
+        } else {
+          console.error("Failed to load user", error);
+          setCurrentUser(null);
+        }
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+
+  const handleLogout = async () => {
+    await logout();
+    setCurrentUser(null);
+    navigate("/login");
   };
 
-  let username = "";
-  if (token) {
-    try {
-      const payload = token.split(".")[1]; // Get the payload part of the JWT
-      const decodedPayload = JSON.parse(atob(payload)); // Decode the payload
-      username = decodedPayload.userName; // Assuming the token has a 'username' field
-    } catch (error) {
-      console.error("Failed to decode token", error);
-    }
-  }
+  const isAuthenticated = !!currentUser;
 
   return (
     <nav className="navbar">
       <ul>
-        {token && <li>{username}</li>}
+        {isAuthenticated && <li>{currentUser}</li>}
         <li>
           <Link to="/">My Books</Link>
         </li>
         <li>
           <Link to="/add-book">Add Book</Link>
         </li>
-        {token ? (
-          <>
-            <li>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
-            </li>
-          </>
+        {isAuthenticated ? (
+          <li>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
+          </li>
         ) : (
           <li>
             <Link to="/login">Login</Link>

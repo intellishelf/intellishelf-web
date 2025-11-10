@@ -1,5 +1,3 @@
-import { tokenClient } from "./tokenClient";
-
 export interface ProblemDetails {
   title: string;
   status: number;
@@ -18,21 +16,10 @@ export class ApiError extends Error {
 async function call<T>(
   url: string,
   method: string,
-  body?: string | FormData,
-  withoutToken?: boolean
+  body?: string | FormData
 ): Promise<T> {
-  const token = tokenClient.getToken();
-  if (!token && !withoutToken) {
-    window.location.href = "/login";
-    throw new ApiError(
-      { title: "Token not found", status: 401, type: "Unauthorized" },
-      401
-    );
-  }
-
-  const headers = {
+  const headers: HeadersInit = {
     Accept: "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(typeof body === "string" ? { "Content-Type": "application/json" } : {}),
   };
 
@@ -41,6 +28,7 @@ async function call<T>(
       method,
       body,
       headers,
+      credentials: "include",
     });
 
     if (result.ok) {
@@ -59,6 +47,10 @@ async function call<T>(
         status: result.status,
         type: "UnknownError"
       };
+    }
+
+    if (result.status === 401 && window.location.pathname !== "/login") {
+      window.location.href = "/login";
     }
 
     throw new ApiError(problemDetails, result.status);
@@ -81,9 +73,9 @@ async function call<T>(
 
 export const apiClient = {
   get: <T>(url: string) => call<T>(url, "GET"),
-  post: <T>(url: string, body: string | FormData, withoutToken?: boolean) =>
-    call<T>(url, "POST", body, withoutToken),
-  put: <T>(url: string, body: string | FormData) =>
+  post: <T>(url: string, body?: string | FormData) =>
+    call<T>(url, "POST", body),
+  put: <T>(url: string, body?: string | FormData) =>
     call<T>(url, "PUT", body),
   delete: <T>(url: string) => call<T>(url, "DELETE"),
 };
