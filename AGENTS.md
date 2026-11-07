@@ -192,9 +192,9 @@ A lightweight fetch-based HTTP client with automatic `/api` prefix:
 export const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api`;
 
 const api = {
-  get: async <T>(endpoint: string, params?: Record<string, any>): Promise<T>,
-  post: async <T>(endpoint: string, body?: any): Promise<T>,
-  put: async <T>(endpoint: string, body: any): Promise<T>,
+  get: async <T>(endpoint: string, params?: object): Promise<T>,
+  post: async <T>(endpoint: string, body?: unknown): Promise<T>,
+  put: async <T>(endpoint: string, body: unknown): Promise<T>,
   delete: async <T>(endpoint: string): Promise<T>,
   upload: async <T>(endpoint: string, formData: FormData): Promise<T>,
 };
