@@ -1,7 +1,7 @@
 export const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api`;
 
 // Helper to build query params (handles arrays, null/undefined)
-const buildQueryParams = (params: Record<string, any>): URLSearchParams => {
+const buildQueryParams = (params: object): URLSearchParams => {
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
@@ -20,7 +20,7 @@ const buildQueryParams = (params: Record<string, any>): URLSearchParams => {
 };
 
 const api = {
-  get: async <T>(endpoint: string, params?: Record<string, any>): Promise<T> => {
+  get: async <T>(endpoint: string, params?: object): Promise<T> => {
     let url = `${API_URL}${endpoint}`;
 
     if (params) {
@@ -44,7 +44,7 @@ const api = {
     return res.json();
   },
 
-  post: async <T>(endpoint: string, body?: any): Promise<T> => {
+  post: async <T>(endpoint: string, body?: unknown): Promise<T> => {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include',
@@ -64,7 +64,7 @@ const api = {
     return res.json();
   },
 
-  put: async <T>(endpoint: string, body: any): Promise<T> => {
+  put: async <T>(endpoint: string, body: unknown): Promise<T> => {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: 'PUT',
       credentials: 'include',
