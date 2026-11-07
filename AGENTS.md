@@ -978,6 +978,8 @@ console.table(arrayOfObjects);  // Nice table view
 
 ## Testing
 
+In restricted ChatGPT Work Linux environments, if headless Chromium fails with EGL errors, try Playwright launch args `--disable-gpu` and `--disable-software-rasterizer` (verified with `@sparticuz/chromium`).
+
 **Current State:** No testing framework set up.
 
 **Recommended Setup (future):**
