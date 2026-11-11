@@ -19,13 +19,14 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/auth/useAuth';
 
-type ColorPalette = 'cyan' | 'purple' | 'emerald' | 'amber';
+type ColorPalette = 'cyan' | 'purple' | 'emerald' | 'amber' | 'rose';
 
 const colorPalettes: Record<ColorPalette, { primary: string; name: string }> = {
   cyan: { primary: '186 100% 53%', name: 'Cyan (Default)' },
   purple: { primary: '270 80% 60%', name: 'Purple' },
   emerald: { primary: '160 84% 39%', name: 'Emerald' },
   amber: { primary: '38 92% 50%', name: 'Amber' },
+  rose: { primary: '350 89% 60%', name: 'Rose' },
 };
 
 const Settings = () => {
