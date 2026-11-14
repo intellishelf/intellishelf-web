@@ -6,11 +6,15 @@ interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  onSubmit?: () => void;
+  aiMode?: boolean;
 }
 
 const SearchBar = ({
   value,
   onChange,
+  onSubmit,
+  aiMode = false,
   placeholder = "Search books by title, author, ISBN, or description..."
 }: SearchBarProps) => {
   const handleClear = () => {
@@ -18,6 +22,7 @@ const SearchBar = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && onSubmit) onSubmit();
     if (e.key === "Escape") {
       handleClear();
     }
@@ -32,7 +37,7 @@ const SearchBar = ({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className='pl-12 pr-12 h-12 bg-search-bg border-border text-foreground placeholder:text-muted-foreground rounded-lg focus-visible:ring-primary'
+        className={`pl-12 pr-12 h-12 bg-search-bg text-foreground placeholder:text-muted-foreground rounded-lg focus-visible:ring-primary ${aiMode ? 'border-primary ring-1 ring-primary' : 'border-border'}`}
         aria-label="Search books"
       />
       {value && (

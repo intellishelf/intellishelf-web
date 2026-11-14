@@ -31,3 +31,6 @@ dist-ssr
 # Playwright
 test-results/
 playwright-report/
+
+# Verifier-created synthetic account states
+.auth/

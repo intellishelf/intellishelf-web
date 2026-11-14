@@ -29,9 +29,11 @@ interface BookCardProps {
   book: Book;
   onClick?: () => void;
   viewMode?: 'grid' | 'list';
+  onDeleted?: (id: string) => void;
+  onEdited?: (id: string) => void;
 }
 
-const BookCard = ({ book, onClick, viewMode = 'grid' }: BookCardProps) => {
+const BookCard = ({ book, onClick, viewMode = 'grid', onDeleted, onEdited }: BookCardProps) => {
   const navigate = useNavigate();
   const { mutate: deleteBook } = useDeleteBook();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -59,7 +61,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid' }: BookCardProps) => {
   };
 
   const confirmDelete = () => {
-    deleteBook(book.id);
+    deleteBook(book.id, { onSuccess: () => onDeleted?.(book.id) });
     setShowDeleteDialog(false);
   };
 
@@ -68,6 +70,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid' }: BookCardProps) => {
     return (
       <>
         <Card
+          data-testid='book-card'
           className='bg-book-card hover:bg-book-card-hover border-border transition-all cursor-pointer group overflow-hidden'
           onClick={handleClick}
         >
@@ -134,7 +137,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid' }: BookCardProps) => {
             </DialogHeader>
             <BookForm
               book={book}
-              onSuccess={() => setShowEditDialog(false)}
+              onSuccess={() => { setShowEditDialog(false); onEdited?.(book.id); }}
             />
           </DialogContent>
         </Dialog>
@@ -225,7 +228,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid' }: BookCardProps) => {
           </DialogHeader>
           <BookForm
             book={book}
-            onSuccess={() => setShowEditDialog(false)}
+            onSuccess={() => { setShowEditDialog(false); onEdited?.(book.id); }}
           />
         </DialogContent>
       </Dialog>
