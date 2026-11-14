@@ -90,7 +90,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid', onDeleted, onEdited }: Boo
 
               {/* Hover overlay with actions */}
               <div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2'>
-                <Button size='icon' variant='secondary' className='h-8 w-8' onClick={handleEdit}>
+                <Button aria-label='Edit book' size='icon' variant='secondary' className='h-8 w-8' onClick={handleEdit}>
                   <Pencil className='h-4 w-4' />
                 </Button>
                 <Button size='icon' variant='destructive' className='h-8 w-8' onClick={handleDelete}>
@@ -190,7 +190,7 @@ const BookCard = ({ book, onClick, viewMode = 'grid', onDeleted, onEdited }: Boo
 
           {/* Hover overlay with actions */}
           <div className='absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2'>
-            <Button size='icon' variant='secondary' className='h-9 w-9' onClick={handleEdit}>
+            <Button aria-label='Edit book' size='icon' variant='secondary' className='h-9 w-9' onClick={handleEdit}>
               <Pencil className='h-4 w-4' />
             </Button>
             <Button size='icon' variant='destructive' className='h-9 w-9' onClick={handleDelete}>

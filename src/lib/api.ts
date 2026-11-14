@@ -56,11 +56,11 @@ const api = {
     return res.json();
   },
 
-  post: async <T>(endpoint: string, body?: unknown): Promise<T> => {
+  post: async <T>(endpoint: string, body?: unknown, headers?: Record<string, string>): Promise<T> => {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...headers },
       body: body ? JSON.stringify(body) : undefined,
     });
 

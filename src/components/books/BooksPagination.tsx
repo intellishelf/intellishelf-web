@@ -22,6 +22,7 @@ interface BooksPaginationProps {
   pageSize: number;
   onPageSizeChange: (pageSize: number) => void;
   totalCount: number;
+  truncated?: boolean;
 }
 
 const BooksPagination = ({
@@ -31,6 +32,7 @@ const BooksPagination = ({
   pageSize,
   onPageSizeChange,
   totalCount,
+  truncated = false,
 }: BooksPaginationProps) => {
   const startItem = (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalCount);
@@ -83,7 +85,7 @@ const BooksPagination = ({
         <p>
           Showing <span className='font-medium text-foreground'>{startItem}</span> to{" "}
           <span className='font-medium text-foreground'>{endItem}</span> of{" "}
-          <span className='font-medium text-foreground'>{totalCount}</span> results
+          <span className='font-medium text-foreground'>{totalCount}</span> {truncated ? 'displayed matches' : 'results'}
         </p>
         <div className='flex items-center gap-2'>
           <label htmlFor="pageSize" className='whitespace-nowrap'>
@@ -111,6 +113,7 @@ const BooksPagination = ({
         <PaginationContent>
           <PaginationItem>
             <PaginationPrevious
+              disabled={currentPage === 1}
               onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
               className={
                 currentPage === 1
@@ -140,6 +143,7 @@ const BooksPagination = ({
 
           <PaginationItem>
             <PaginationNext
+              disabled={currentPage === totalPages}
               onClick={() => currentPage < totalPages && onPageChange(currentPage + 1)}
               className={
                 currentPage === totalPages
