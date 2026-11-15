@@ -1,3 +1,16 @@
+export class ApiError extends Error {
+  constructor(message: string, public status: number, public type?: string) {
+    super(message);
+  }
+}
+
+async function responseError(res: Response): Promise<ApiError> {
+  const body = await res.text();
+  let type: string | undefined;
+  try { type = JSON.parse(body).type; } catch { /* Non-ProblemDetails response. */ }
+  return new ApiError(body || `HTTP ${res.status}: ${res.statusText}`, res.status, type);
+}
+
 export const API_URL = `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'}/api`;
 
 // Helper to build query params (handles arrays, null/undefined)
@@ -37,24 +50,22 @@ const api = {
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+      throw await responseError(res);
     }
 
     return res.json();
   },
 
-  post: async <T>(endpoint: string, body?: unknown): Promise<T> => {
+  post: async <T>(endpoint: string, body?: unknown, headers?: Record<string, string>): Promise<T> => {
     const res = await fetch(`${API_URL}${endpoint}`, {
       method: 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...headers },
       body: body ? JSON.stringify(body) : undefined,
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+      throw await responseError(res);
     }
 
     if (res.status === 204) {
@@ -73,8 +84,7 @@ const api = {
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+      throw await responseError(res);
     }
 
     return res.json();
@@ -88,8 +98,7 @@ const api = {
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+      throw await responseError(res);
     }
 
     if (res.status === 204) {
@@ -107,8 +116,7 @@ const api = {
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error || `HTTP ${res.status}: ${res.statusText}`);
+      throw await responseError(res);
     }
 
     return res.json();

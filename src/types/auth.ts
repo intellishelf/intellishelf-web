@@ -26,6 +26,7 @@ export interface LoginResult {
 
 // User response from /auth/me endpoint
 export interface UserResponse {
+  isPro?: boolean;
   id: string;
   email: string;
 }
