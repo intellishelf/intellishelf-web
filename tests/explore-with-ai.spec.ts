@@ -18,7 +18,7 @@ async function seed(api: APIRequestContext, title: string, extra: Record<string,
 async function openLibrary(page: Page, path = '/') {
   await page.goto(path);
   await expect(page).not.toHaveURL(/\/auth/);
-  await expect(page.getByRole('heading', { name: 'Library' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Library', exact: true })).toBeVisible();
 }
 async function turnOn(page: Page) { await page.getByRole('switch', { name: 'Explore with AI' }).check(); }
 async function search(page: Page, value: string) { await page.getByLabel('Search books').fill(value); }
@@ -58,7 +58,15 @@ test.describe('AI vector search: Explore with AI', () => {
       if (request.url().includes('/api/books/explore') && request.method() === 'POST') { exploreBodies.push(request.postDataJSON()); exploreOwners.push(request.headers()['x-explore-user-id']); }
     });
     if (!/TC-01|TC-13/.test(testInfo.title)) {
-      if (nonPro) ids.push(await seed(api, 'Dune'));
+      if (nonPro) {
+        ids.push(await seed(api, 'Dune'));
+        await expect.poll(async () => {
+          const response = await api.get(`${API}/books/search?searchTerm=Dune&page=1&pageSize=24`);
+          if (!response.ok()) return false;
+          const data = await response.json();
+          return data.items.some((book: { title: string }) => book.title === 'Dune');
+        }, { timeout: 30000 }).toBe(true);
+      }
       else {
         ids.push(await seed(api, 'Dune', { Authors: 'Frank Herbert' }));
         ids.push(await seed(api, 'The Quiet Lighthouse', { Description: 'A keeper lives alone in solitude.' }));
@@ -90,7 +98,9 @@ test.describe('AI vector search: Explore with AI', () => {
   test('TC-02 [G1/AC6, G1/AC7, G2/AC3, G2/AC12, G2/AC16, G9/AC1] mode keeps text and does not search while typing', async ({ page }) => {
     const toggle = page.getByRole('switch', { name: 'Explore with AI' });
     await expect(toggle).not.toBeChecked();
-    await search(page, 'Dune'); await expect(page.getByTestId('book-card').filter({ hasText: 'Dune' })).toBeVisible();
+    const keywordResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/api/books/search' && new URL(response.url()).searchParams.get('searchTerm') === 'Dune');
+    await search(page, 'Dune'); expect((await keywordResponse).ok()).toBeTruthy();
+    await expect(page.getByTestId('book-card').filter({ hasText: 'Dune' })).toBeVisible();
     expect(requests.some(url => url.includes('/search'))).toBe(true);
     const before = await page.getByTestId('book-card').allTextContents();
     const count = requests.length;
@@ -186,7 +196,8 @@ test.describe('AI vector search: Explore with AI', () => {
     const panel = page.getByRole('region', { name: 'Explore with AI Pro' });
     const checkPanel = async () => { await expect(panel).toContainText('Explore with AI is a Pro feature'); await expect(panel).toContainText('Pro cannot be purchased yet'); await expect(panel).toContainText(proDisclosure); await expect(panel.getByRole('button', { name: /purchase|upgrade/i })).toHaveCount(0); await expect(page.getByRole('switch', { name: 'Explore with AI' })).not.toBeChecked(); };
     await page.getByRole('switch', { name: 'Explore with AI' }).click(); await checkPanel(); await page.getByRole('button', { name: 'Dismiss' }).click();
-    await search(page, 'Dune'); await expect(page.getByTestId('book-card').filter({ hasText: 'Dune' })).toBeVisible(); await page.getByRole('button', { name: 'Explore with AI' }).click(); await checkPanel(); await page.getByRole('button', { name: 'Dismiss' }).click();
+    const keywordResponse = page.waitForResponse(response => new URL(response.url()).pathname === '/api/books/search' && new URL(response.url()).searchParams.get('searchTerm') === 'Dune');
+    await search(page, 'Dune'); expect((await keywordResponse).ok()).toBeTruthy(); await expect(page.getByTestId('book-card').filter({ hasText: 'Dune' })).toBeVisible(); await page.getByRole('button', { name: 'Explore with AI' }).click(); await checkPanel(); await page.getByRole('button', { name: 'Dismiss' }).click();
     await search(page, 'quantum physics'); await page.getByRole('button', { name: 'Try exploring by meaning' }).click(); await checkPanel(); expect(requests.filter(x => x.includes('/explore'))).toHaveLength(0);
   });
   test('TC-11 [G2/AC16] reload discards AI state and prompt is absent from URL', async ({ page }) => {
