@@ -15,6 +15,18 @@ import { useSearchBooks } from '@/hooks/books/useSearchBooks';
 import { useDebounce } from '@/hooks/utils/useDebounce';
 import { ReadingStatus, BookOrderBy } from '@/types/book';
 
+const viewModeKey = 'library-view-mode';
+type ViewMode = 'grid' | 'list';
+
+const getInitialViewMode = (): ViewMode => {
+  try {
+    const saved = localStorage.getItem(viewModeKey);
+    return saved === 'grid' || saved === 'list' ? saved : 'grid';
+  } catch {
+    return 'grid';
+  }
+};
+
 const Library = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -33,7 +45,7 @@ const Library = () => {
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [orderBy] = useState<BookOrderBy>(BookOrderBy.Added);
   const [ascending] = useState(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<ViewMode>(getInitialViewMode);
 
   // Debounce search term
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -74,6 +86,15 @@ const Library = () => {
   }, [debouncedSearch, selectedStatus, page, pageSize, setSearchParams]);
 
   // Handlers
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    try {
+      localStorage.setItem(viewModeKey, mode);
+    } catch {
+      // The selection still applies for this visit when storage is unavailable.
+    }
+  };
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setPage(1); // Reset to first page on search
@@ -113,14 +134,18 @@ const Library = () => {
               <Button
                 variant={viewMode === 'grid' ? 'default' : 'outline'}
                 size='icon'
-                onClick={() => setViewMode('grid')}
+                aria-label='Grid view'
+                aria-pressed={viewMode === 'grid'}
+                onClick={() => handleViewModeChange('grid')}
               >
                 <Grid3x3 className='w-4 h-4' />
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'outline'}
                 size='icon'
-                onClick={() => setViewMode('list')}
+                aria-label='List view'
+                aria-pressed={viewMode === 'list'}
+                onClick={() => handleViewModeChange('list')}
               >
                 <List className='w-4 h-4' />
               </Button>
@@ -192,13 +217,13 @@ const Library = () => {
           ) : books && books.length > 0 ? (
             <>
               {viewMode === 'grid' ? (
-                <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
+                <div data-testid='library-books' className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6'>
                   {books.map((book) => (
                     <BookCard key={book.id} book={book} viewMode='grid' />
                   ))}
                 </div>
               ) : (
-                <div className='flex flex-col gap-3 max-w-4xl'>
+                <div data-testid='library-books' className='flex flex-col gap-3 max-w-4xl'>
                   {books.map((book) => (
                     <BookCard key={book.id} book={book} viewMode='list' />
                   ))}
