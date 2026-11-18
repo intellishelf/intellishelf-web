@@ -49,6 +49,7 @@ const BookForm = ({ book, onSuccess }: BookFormProps) => {
             ? book.publicationDate.split('T')[0]
             : '',
           publisher: book.publisher || '',
+          language: book.language || '',
           tags: book.tags?.join(', ') || '',
           status: book.status,
           startedReadingDate: book.startedReadingDate
@@ -227,6 +228,20 @@ const BookForm = ({ book, onSuccess }: BookFormProps) => {
               <FormLabel>Publisher</FormLabel>
               <FormControl>
                 <Input placeholder='Scribner' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='language'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Language</FormLabel>
+              <FormControl>
+                <Input placeholder='en' {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
