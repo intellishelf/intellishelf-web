@@ -20,6 +20,7 @@ export interface Book {
   pages?: number | null;
   publicationDate?: string | null;
   publisher?: string | null;
+  language?: string | null;
   tags?: string[] | null;
   status: ReadingStatus;
   startedReadingDate?: string | null;
@@ -70,6 +71,7 @@ export interface BookFormData {
   pages?: number;
   publicationDate?: string;
   publisher?: string;
+  language?: string;
   tags?: string; // Comma-separated in form, will be split to array for backend
   imageFile?: File;
   status?: ReadingStatus;
