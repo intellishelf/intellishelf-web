@@ -7,7 +7,9 @@ const title = `Library view test ${Date.now()}`;
 
 // Check both the selected control and the rendered layout around a real book.
 async function expectView(page: Page, mode: 'grid' | 'list') {
-  await expect(page.getByRole('heading', { name: title })).toBeVisible();
+  const bookTitle = page.getByRole('heading', { name: title });
+  await expect(bookTitle).toBeVisible();
+  await expect(bookTitle).toHaveClass(mode === 'grid' ? /\bline-clamp-2\b/ : /\bline-clamp-1\b/);
   await expect(page.getByRole('button', { name: 'Grid view' })).toHaveAttribute('aria-pressed', String(mode === 'grid'));
   await expect(page.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', String(mode === 'list'));
   await expect(page.getByTestId('library-books')).toHaveClass(mode === 'grid' ? /\bgrid\b/ : /\bflex-col\b/);
