@@ -38,6 +38,7 @@ const BookDetail = () => {
     title: '',
     authors: '',
     publisher: '',
+    language: '',
     publicationDate: '',
     isbn10: '',
     isbn13: '',
@@ -56,6 +57,7 @@ const BookDetail = () => {
         title: book.title || '',
         authors: book.authors || '',
         publisher: book.publisher || '',
+        language: book.language || '',
         publicationDate: book.publicationDate || '',
         isbn10: book.isbn10 || '',
         isbn13: book.isbn13 || '',
@@ -81,6 +83,7 @@ const BookDetail = () => {
         title: editForm.title,
         authors: editForm.authors,
         publisher: editForm.publisher || undefined,
+        language: editForm.language || undefined,
         publicationDate: editForm.publicationDate || undefined,
         isbn10: editForm.isbn10 || undefined,
         isbn13: editForm.isbn13 || undefined,
@@ -102,6 +105,7 @@ const BookDetail = () => {
         title: book.title || '',
         authors: book.authors || '',
         publisher: book.publisher || '',
+        language: book.language || '',
         publicationDate: book.publicationDate || '',
         isbn10: book.isbn10 || '',
         isbn13: book.isbn13 || '',
@@ -266,6 +270,16 @@ const BookDetail = () => {
                   </div>
 
                   <div>
+                    <Label htmlFor='language'>Language</Label>
+                    <Input
+                      id='language'
+                      value={editForm.language}
+                      onChange={(e) => setEditForm({ ...editForm, language: e.target.value })}
+                      className='mt-1'
+                    />
+                  </div>
+
+                  <div>
                     <Label htmlFor='publicationDate'>Publication Date</Label>
                     <Input
                       id='publicationDate'
@@ -340,7 +354,14 @@ const BookDetail = () => {
 
                     <div className='flex flex-wrap gap-2'>
                       <StatusBadge status={book.status} />
-                      {book.publicationDate && (
+                      {book.language && (
+                      <div>
+                        <p className='text-sm text-muted-foreground mb-1'>Language</p>
+                        <p className='text-lg'>{book.language}</p>
+                      </div>
+                    )}
+
+                    {book.publicationDate && (
                         <Badge
                           variant='secondary'
                           className='text-sm backdrop-blur-sm'
