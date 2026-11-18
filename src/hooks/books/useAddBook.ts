@@ -18,6 +18,7 @@ const toFormData = (data: BookFormData): FormData => {
   if (data.pages) formData.append('pages', data.pages.toString());
   if (data.publicationDate) formData.append('publicationDate', data.publicationDate);
   if (data.publisher) formData.append('publisher', data.publisher);
+  if (data.language) formData.append('language', data.language);
 
   // Convert status enum to number
   if (data.status !== undefined) formData.append('status', data.status.toString());

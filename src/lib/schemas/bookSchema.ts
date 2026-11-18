@@ -11,6 +11,7 @@ export const bookSchema = z.object({
   pages: z.coerce.number().positive().optional().or(z.literal('')),
   publicationDate: z.string().optional(),
   publisher: z.string().optional(),
+  language: z.string().optional(),
   tags: z.string().optional(),
   imageFile: z.instanceof(File).optional(),
   status: z.nativeEnum(ReadingStatus).optional(),

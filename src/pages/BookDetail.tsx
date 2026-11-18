@@ -38,6 +38,7 @@ const BookDetail = () => {
     title: '',
     authors: '',
     publisher: '',
+    language: '',
     publicationDate: '',
     isbn10: '',
     isbn13: '',
@@ -56,6 +57,7 @@ const BookDetail = () => {
         title: book.title || '',
         authors: book.authors || '',
         publisher: book.publisher || '',
+        language: book.language || '',
         publicationDate: book.publicationDate || '',
         isbn10: book.isbn10 || '',
         isbn13: book.isbn13 || '',
@@ -81,6 +83,7 @@ const BookDetail = () => {
         title: editForm.title,
         authors: editForm.authors,
         publisher: editForm.publisher || undefined,
+        language: editForm.language || undefined,
         publicationDate: editForm.publicationDate || undefined,
         isbn10: editForm.isbn10 || undefined,
         isbn13: editForm.isbn13 || undefined,
@@ -102,6 +105,7 @@ const BookDetail = () => {
         title: book.title || '',
         authors: book.authors || '',
         publisher: book.publisher || '',
+        language: book.language || '',
         publicationDate: book.publicationDate || '',
         isbn10: book.isbn10 || '',
         isbn13: book.isbn13 || '',
@@ -196,6 +200,7 @@ const BookDetail = () => {
                     size='sm'
                     className='flex-1'
                     onClick={handleSave}
+                    data-testid='book-save'
                   >
                     <Save className='w-4 h-4' />
                   </Button>
@@ -215,6 +220,7 @@ const BookDetail = () => {
                     size='sm'
                     className='flex-1'
                     onClick={() => setIsEditing(true)}
+                    data-testid='book-edit'
                   >
                     <Edit className='w-4 h-4' />
                   </Button>
@@ -261,6 +267,16 @@ const BookDetail = () => {
                       id='publisher'
                       value={editForm.publisher}
                       onChange={(e) => setEditForm({ ...editForm, publisher: e.target.value })}
+                      className='mt-1'
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor='language'>Language</Label>
+                    <Input
+                      id='language'
+                      value={editForm.language}
+                      onChange={(e) => setEditForm({ ...editForm, language: e.target.value })}
                       className='mt-1'
                     />
                   </div>
@@ -391,6 +407,13 @@ const BookDetail = () => {
                       <div>
                         <p className='text-sm text-muted-foreground mb-1'>Publisher</p>
                         <p className='text-lg'>{book.publisher}</p>
+                      </div>
+                    )}
+
+                    {book.language && (
+                      <div>
+                        <p className='text-sm text-muted-foreground mb-1'>Language</p>
+                        <p className='text-lg'>{book.language}</p>
                       </div>
                     )}
 
